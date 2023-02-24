@@ -16,6 +16,14 @@
         <log4j.version>2.19.0</log4j.version>
     </properties>
 
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Techtony96 Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/Techtony96/Discord-Common</url>
+        </repository>
+    </distributionManagement>
+
 
     <dependencies>
         <dependency>
