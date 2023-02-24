@@ -10,7 +10,7 @@
 
     <properties>
         <discord4j.version>3.2.3</discord4j.version>
-        <spring.version>3.0.2</spring.version>
+        <spring.version>3.0.3</spring.version>
         <log4j.version>2.19.0</log4j.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
