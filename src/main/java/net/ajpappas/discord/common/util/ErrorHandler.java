@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.function.Function;
 
-public class ErrorHandler {
+public final class ErrorHandler {
     private static final Logger log = LogManager.getLogger();
 
     public static Mono<Void> handleError(Throwable error, Function<String, Mono> reply) {

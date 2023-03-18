@@ -3,7 +3,7 @@ package net.ajpappas.discord.common.util;
 import discord4j.common.util.Snowflake;
 import discord4j.core.object.entity.Message;
 
-public class MessageUtil {
+public final class MessageUtil {
 
     public static String getLink(Message message) {
         String guildId = message.getGuildId().map(Snowflake::asString).orElse("@me");
