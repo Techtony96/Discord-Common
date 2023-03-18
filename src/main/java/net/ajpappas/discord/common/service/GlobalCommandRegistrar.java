@@ -53,8 +53,7 @@ public class GlobalCommandRegistrar implements ApplicationRunner {
         */
         LOGGER.info("Registering {} commands: {}", commands.size(), commands.stream().map(ApplicationCommandRequest::name).collect(Collectors.joining(",")));
         applicationService.bulkOverwriteGlobalApplicationCommand(applicationId, commands)
-                .doOnEach(command -> LOGGER.debug("Successfully registered {}", command.get().name()))
-                .doOnNext(ignore -> LOGGER.info("Successfully registered Global Commands"))
+                .doOnNext(command -> LOGGER.debug("Successfully registered {}", command.name()))
                 .doOnError(e -> LOGGER.error("Failed to register global commands", e))
                 .subscribe();
     }
