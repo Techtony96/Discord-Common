@@ -18,67 +18,32 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Collection;
 import java.util.List;
 
 @Component
 public class CommandListener {
 
-    private final Collection<SlashCommand> slashCommands;
-    private final Collection<MessageCommand> messageCommands;
-    private final Collection<UserCommand> userCommands;
-
     @Autowired
     public CommandListener(List<SlashCommand> slashCommands, List<MessageCommand> messageCommands, List<UserCommand> userCommands, GatewayDiscordClient client) {
-        this.slashCommands = slashCommands;
-        this.messageCommands = messageCommands;
-        this.userCommands = userCommands;
-        client.on(ChatInputInteractionEvent.class, this::slashCommand).subscribe();
-        client.on(MessageInteractionEvent.class, this::messageCommand).subscribe();
-        client.on(UserInteractionEvent.class, this::userCommand).subscribe();
+        client.on(ChatInputInteractionEvent.class, event -> handleCommand(event, slashCommands)).subscribe();
+        client.on(MessageInteractionEvent.class, event -> handleCommand(event, messageCommands)).subscribe();
+        client.on(UserInteractionEvent.class, event -> handleCommand(event, userCommands)).subscribe();
     }
 
-
-    public Mono<Void> slashCommand(ChatInputInteractionEvent event) {
-        return Flux.fromIterable(slashCommands)
+    public <T extends ApplicationCommandInteractionEvent> Mono<Void> handleCommand(T event, List<? extends Command<T>> commands) {
+        return Flux.fromIterable(commands)
                 .filter(command -> command.getName().equals(event.getCommandName()))
                 .next()
                 .flatMap(command -> {
-                            if (!hasPermission(command, event))
-                                return event.reply("You do not have permission for this command.").withEphemeral(true);
-                            return command.handle(event)
-                                    .onErrorResume(error -> ErrorHandler.handleError(error, msg -> event.reply(msg).withEphemeral(true)));
-                        }
-                );
+                    if (!hasPermission(command, event)) {
+                        return event.reply("You do not have permission for this command.").withEphemeral(true);
+                    }
+                    return command.handle(event)
+                            .onErrorResume(error -> ErrorHandler.handleError(error, msg -> event.reply(msg).withEphemeral(true)));
+                });
     }
 
-    public Mono<Void> messageCommand(MessageInteractionEvent event) {
-        return Flux.fromIterable(messageCommands)
-                .filter(command -> command.getName().equals(event.getCommandName()))
-                .next()
-                .flatMap(command -> {
-                            if (!hasPermission(command, event))
-                                return event.reply("You do not have permission for this command.").withEphemeral(true);
-                            return command.handle(event)
-                                    .onErrorResume(error -> ErrorHandler.handleError(error, msg -> event.reply(msg).withEphemeral(true)));
-                        }
-                );
-    }
-
-    public Mono<Void> userCommand(UserInteractionEvent event) {
-        return Flux.fromIterable(userCommands)
-                .filter(command -> command.getName().equals(event.getCommandName()))
-                .next()
-                .flatMap(command -> {
-                            if (!hasPermission(command, event))
-                                return event.reply("You do not have permission for this command.").withEphemeral(true);
-                            return command.handle(event)
-                                    .onErrorResume(error -> ErrorHandler.handleError(error, msg -> event.reply(msg).withEphemeral(true)));
-                        }
-                );
-    }
-
-    private boolean hasPermission(Command command, ApplicationCommandInteractionEvent event) {
+    private boolean hasPermission(Command<? extends ApplicationCommandInteractionEvent> command, ApplicationCommandInteractionEvent event) {
         if (command.requiredPermissions() == null || command.requiredPermissions().isEmpty())
             return true;
 
