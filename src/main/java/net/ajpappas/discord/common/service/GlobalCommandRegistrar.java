@@ -10,12 +10,12 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class GlobalCommandRegistrar implements ApplicationRunner {
@@ -51,8 +51,10 @@ public class GlobalCommandRegistrar implements ApplicationRunner {
         /* Bulk overwrite commands. This is now idempotent, so it is safe to use this even when only 1 command
         is changed/added/removed
         */
+        LOGGER.info("Registering {} commands: {}", commands.size(), commands.stream().map(ApplicationCommandRequest::name).collect(Collectors.joining(",")));
         applicationService.bulkOverwriteGlobalApplicationCommand(applicationId, commands)
-                .doOnNext(ignore -> LOGGER.debug("Successfully registered Global Commands"))
+                .doOnEach(command -> LOGGER.debug("Successfully registered {}", command.get().name()))
+                .doOnNext(ignore -> LOGGER.info("Successfully registered Global Commands"))
                 .doOnError(e -> LOGGER.error("Failed to register global commands", e))
                 .subscribe();
     }
