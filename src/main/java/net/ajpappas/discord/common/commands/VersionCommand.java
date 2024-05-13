@@ -2,6 +2,7 @@ package net.ajpappas.discord.common.commands;
 
 import discord4j.common.util.TimestampFormat;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
 import discord4j.rest.util.Permission;
@@ -43,6 +44,11 @@ public class VersionCommand implements GlobalSlashCommand {
         if (StringUtil.isNullOrEmpty(version) && commitTime == null)
             return Mono.error(new UserException("Version information is not available."));
         return event.reply().withEphemeral(true).withContent(String.format("Version: `%s`\nDate: %s", version, getFormattedCommitTime()));
+    }
+
+    @Override
+    public Class<ChatInputInteractionEvent> getEventClassType() {
+        return ChatInputInteractionEvent.class;
     }
 
     private String getFormattedCommitTime() {
