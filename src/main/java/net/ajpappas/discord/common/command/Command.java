@@ -22,5 +22,4 @@ interface Command<T extends ApplicationCommandInteractionEvent> {
         Type superClass = getClass().getGenericSuperclass();
         return (Class<T>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
     }
-
 }

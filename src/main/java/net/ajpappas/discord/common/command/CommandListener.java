@@ -2,9 +2,6 @@ package net.ajpappas.discord.common.command;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.interaction.MessageInteractionEvent;
-import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
@@ -16,13 +13,11 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.List;
 
 @Component
 @Log4j2
-public class CommandListener extends EventListener<ApplicationCommandInteractionEvent> {
+public class CommandListener implements EventListener<ApplicationCommandInteractionEvent> {
 
     private final List<Command<?>> commands;
 

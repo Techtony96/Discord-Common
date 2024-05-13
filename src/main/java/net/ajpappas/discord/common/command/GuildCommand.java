@@ -7,5 +7,4 @@ import java.util.Collection;
 interface GuildCommand<T extends ApplicationCommandInteractionEvent> extends Command<T> {
 
     Collection<Long> guilds();
-
 }

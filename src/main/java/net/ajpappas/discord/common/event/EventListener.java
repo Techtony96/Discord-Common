@@ -1,31 +1,32 @@
 package net.ajpappas.discord.common.event;
 
 import discord4j.core.event.domain.Event;
-import lombok.Getter;
+import lombok.extern.log4j.Log4j2;
+import net.ajpappas.discord.common.util.EventFilters;
 import reactor.core.publisher.Mono;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.Collections;
-import java.util.Set;
 import java.util.function.Predicate;
 
-public abstract class EventListener<T extends Event> {
+public interface EventListener<T extends Event> {
 
-    @Getter
-    private final Class<T> eventType;
+    @Log4j2
+    final class LogHolder{}
 
-    public EventListener(Class<T> eventType) {
-        this.eventType = eventType;
+    default Predicate<? super T> filters() {
+        return EventFilters.NO_FILTER;
     }
 
-    public Predicate<? extends T> filters() {
-        return x -> true;
+    Mono<Void> handle(T event);
+
+    default Mono<Void> error(Throwable throwable) {
+        LogHolder.log.error("Unable to handle {} event", getEventType(), throwable);
+        return Mono.empty();
     }
 
-    public abstract Mono<Void> handle(T event);
-
-    public Class<T> getEventType() {
-        return eventType;
+    default Class<T> getEventType() {
+        Type superClass = getClass().getGenericSuperclass();
+        return (Class<T>) ((ParameterizedType) superClass).getActualTypeArguments()[0];
     }
 }

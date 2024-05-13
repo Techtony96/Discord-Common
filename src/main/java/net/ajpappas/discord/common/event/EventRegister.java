@@ -1,15 +1,11 @@
-package net.ajpappas.discord.common.service;
+package net.ajpappas.discord.common.event;
 
 import com.austinv11.servicer.Service;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
-import net.ajpappas.discord.common.event.EventListener;
 import org.springframework.beans.factory.annotation.Autowired;
-import reactor.core.publisher.Flux;
-import reactor.function.Predicate3;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 @Service
 public class EventRegister {
@@ -22,10 +18,10 @@ public class EventRegister {
         eventListeners.forEach(this::register);
     }
 
-    private void register(EventListener<? extends Event> eventListener) {
+    private <T extends Event> void register(EventListener<T> eventListener) {
         this.client.on(eventListener.getEventType())
-              //  .filter(eventListener.filters())
-                .doOnNext(eventListener::handle)
+                .filter(eventListener.filters())
+                .flatMap(event -> eventListener.handle(event).then().onErrorResume(eventListener::error))
                 .subscribe();
     }
 }

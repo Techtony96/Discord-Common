@@ -5,5 +5,4 @@ import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEven
 import java.util.Collection;
 
 interface GlobalCommand<T extends ApplicationCommandInteractionEvent> extends Command<T> {
-
 }
