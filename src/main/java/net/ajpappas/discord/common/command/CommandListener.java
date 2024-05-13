@@ -27,6 +27,11 @@ public class CommandListener implements EventListener<ApplicationCommandInteract
     }
 
     @Override
+    public Class<ApplicationCommandInteractionEvent> getEventType() {
+        return ApplicationCommandInteractionEvent.class;
+    }
+
+    @Override
     public Mono<Void> handle(ApplicationCommandInteractionEvent event) {
         return Flux.fromIterable(commands)
                 .filter(command -> command.requestBuilder().build().name().equals(event.getCommandName()))
