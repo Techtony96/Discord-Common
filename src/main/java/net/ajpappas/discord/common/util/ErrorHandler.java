@@ -1,6 +1,6 @@
 package net.ajpappas.discord.common.util;
 
-import net.ajpappas.discord.common.exception.UserException;
+import net.ajpappas.discord.common.model.exception.UserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import reactor.core.publisher.Mono;

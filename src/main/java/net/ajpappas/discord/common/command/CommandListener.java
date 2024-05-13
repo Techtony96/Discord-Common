@@ -1,17 +1,12 @@
-package net.ajpappas.discord.common.listeners;
+package net.ajpappas.discord.common.command;
 
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
-import discord4j.core.event.domain.interaction.MessageInteractionEvent;
-import discord4j.core.event.domain.interaction.UserInteractionEvent;
 import discord4j.core.object.entity.Member;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import net.ajpappas.discord.common.command.Command;
-import net.ajpappas.discord.common.command.MessageCommand;
-import net.ajpappas.discord.common.command.SlashCommand;
-import net.ajpappas.discord.common.command.UserCommand;
+import lombok.extern.log4j.Log4j2;
+import net.ajpappas.discord.common.event.EventListener;
 import net.ajpappas.discord.common.util.ErrorHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,24 +16,26 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 
 @Component
-public class CommandListener {
+@Log4j2
+public class CommandListener implements EventListener<ApplicationCommandInteractionEvent> {
+
+    private final List<Command<?>> commands;
 
     @Autowired
-    public CommandListener(List<SlashCommand> slashCommands, List<MessageCommand> messageCommands, List<UserCommand> userCommands, GatewayDiscordClient client) {
-        client.on(ChatInputInteractionEvent.class, event -> handleCommand(event, slashCommands)).subscribe();
-        client.on(MessageInteractionEvent.class, event -> handleCommand(event, messageCommands)).subscribe();
-        client.on(UserInteractionEvent.class, event -> handleCommand(event, userCommands)).subscribe();
+    public CommandListener(GatewayDiscordClient client, List<Command<?>> commands) {
+        this.commands = commands;
     }
 
-    public <T extends ApplicationCommandInteractionEvent> Mono<Void> handleCommand(T event, List<? extends Command<T>> commands) {
+    @Override
+    public Mono<Void> handle(ApplicationCommandInteractionEvent event) {
         return Flux.fromIterable(commands)
-                .filter(command -> command.getName().equals(event.getCommandName()))
+                .filter(command -> command.requestBuilder().build().name().equals(event.getCommandName()))
                 .next()
                 .flatMap(command -> {
                     if (!hasPermission(command, event)) {
                         return event.reply("You do not have permission for this command.").withEphemeral(true);
                     }
-                    return command.handle(event)
+                    return command.handle(command.getEventClassType().cast(event))
                             .onErrorResume(error -> ErrorHandler.handleError(error, msg -> event.reply(msg).withEphemeral(true)));
                 });
     }

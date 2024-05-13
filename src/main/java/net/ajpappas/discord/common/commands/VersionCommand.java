@@ -1,10 +1,13 @@
-package net.ajpappas.discord.common.command;
+package net.ajpappas.discord.common.commands;
 
 import discord4j.common.util.TimestampFormat;
-import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
+import discord4j.core.event.domain.interaction.ApplicationCommandInteractionEvent;
+import discord4j.discordjson.json.ApplicationCommandRequest;
+import discord4j.discordjson.json.ImmutableApplicationCommandRequest;
 import discord4j.rest.util.Permission;
 import discord4j.rest.util.PermissionSet;
-import net.ajpappas.discord.common.exception.UserException;
+import net.ajpappas.discord.common.command.GlobalSlashCommand;
+import net.ajpappas.discord.common.model.exception.UserException;
 import net.ajpappas.discord.common.util.StringUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,7 +17,7 @@ import reactor.core.publisher.Mono;
 import java.time.Instant;
 
 @Component
-public class VersionCommand implements SlashCommand {
+public class VersionCommand implements GlobalSlashCommand {
 
     @Value("${git.commit.id.describe-short:#{null}}")
     private String version;
@@ -24,17 +27,19 @@ public class VersionCommand implements SlashCommand {
     private Instant commitTime;
 
     @Override
-    public String getName() {
-        return "version";
-    }
-
-    @Override
     public PermissionSet requiredPermissions() {
         return PermissionSet.of(Permission.ADMINISTRATOR);
     }
 
     @Override
-    public Mono<Void> handle(ChatInputInteractionEvent event) {
+    public ImmutableApplicationCommandRequest.Builder requestBuilder() {
+        return ApplicationCommandRequest.builder()
+                .name("version")
+                .description("Get the current version of the bot");
+    }
+
+    @Override
+    public Mono<Void> handle(ApplicationCommandInteractionEvent event) {
         if (StringUtil.isNullOrEmpty(version) && commitTime == null)
             return Mono.error(new UserException("Version information is not available."));
         return event.reply().withEphemeral(true).withContent(String.format("Version: `%s`\nDate: %s", version, getFormattedCommitTime()));

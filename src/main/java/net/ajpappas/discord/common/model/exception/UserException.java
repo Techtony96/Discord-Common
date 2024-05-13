@@ -1,4 +1,4 @@
-package net.ajpappas.discord.common.exception;
+package net.ajpappas.discord.common.model.exception;
 
 public class UserException extends Exception {
     public UserException(String message) {
