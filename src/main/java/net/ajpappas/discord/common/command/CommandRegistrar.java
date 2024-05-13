@@ -4,29 +4,21 @@ import discord4j.core.GatewayDiscordClient;
 import discord4j.discordjson.json.ApplicationCommandRequest;
 import discord4j.rest.RestClient;
 import discord4j.rest.service.ApplicationService;
-import net.ajpappas.discord.common.command.Command;
-import net.ajpappas.discord.common.command.GuildCommand;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.annotation.PostConstruct;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.io.IOException;
 import java.util.AbstractMap;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
-public class CommandRegistrar implements ApplicationRunner {
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+@Log4j2
+public class CommandRegistrar {
 
     private final RestClient restClient;
     private final List<GlobalCommand<?>> globalCommands;
@@ -40,7 +32,7 @@ public class CommandRegistrar implements ApplicationRunner {
     }
 
     //This method will run only once on each start up and is automatically called with Spring so blocking is okay.
-    @Override
+    @PostConstruct
     public void run(ApplicationArguments args) throws IOException {
         final ApplicationService applicationService = restClient.getApplicationService();
         final long applicationId = restClient.getApplicationId().block();
