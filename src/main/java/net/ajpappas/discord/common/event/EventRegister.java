@@ -21,6 +21,7 @@ public class EventRegister {
     private <T extends Event> void register(EventListener<T> eventListener) {
         this.client.on(eventListener.getEventType())
                 .filter(eventListener.filters())
+                .filterWhen(eventListener.asyncFilters())
                 .flatMap(event -> eventListener.handle(event).then().onErrorResume(eventListener::error))
                 .subscribe();
     }
