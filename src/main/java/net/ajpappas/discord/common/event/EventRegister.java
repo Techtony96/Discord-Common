@@ -1,9 +1,9 @@
 package net.ajpappas.discord.common.event;
 
-import com.austinv11.servicer.Service;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.Event;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
